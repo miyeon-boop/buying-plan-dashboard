@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;color:#111;background:#f5f5f5;padding:20px;line-height:1.5}
+
+/* 헤더 */
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.header-left h1{font-size:20px;font-weight:600;color:#111;letter-spacing:-0.5px}
+.header-left p{font-size:12px;color:#999;margin-top:2px}
+.header-right{display:flex;align-items:center;gap:8px}
+.sheet-btn{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:#16a34a;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:5px 12px;text-decoration:none}
+.sync-pill{display:flex;align-items:center;gap:5px;font-size:12px;color:#888;padding:5px 12px;border:1px solid #e5e5e5;border-radius:99px;background:#fff}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:#ccc;flex-shrink:0}
+.sync-dot.ok{background:#22c55e}.sync-dot.loading{background:#f59e0b;animation:pulse 1s infinite}.sync-dot.err{background:#ef4444}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* 예산 토글 */
+.budget-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 16px;background:#fff;border-radius:12px;border:1px solid #e8e8e8;margin-bottom:8px;user-select:none}
+.budget-toggle:hover{border-color:#ccc}
+.budget-toggle-title{font-size:13px;font-weight:500;color:#111}
+.budget-toggle-arrow{font-size:10px;color:#aaa;margin-left:auto;transition:transform 0.2s}
+.budget-toggle-arrow.open{transform:rotate(180deg)}
+
+/* 예산 섹션 */
+.budget-section{background:#fff;border-radius:12px;border:1px solid #e8e8e8;padding:16px;margin-bottom:16px}
+.budget-months{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px}
+.budget-month-btn{font-size:11px;padding:3px 9px;border-radius:6px;border:1px solid #e5e5e5;background:#f9f9f9;color:#666;cursor:pointer;font-weight:500}
+.budget-month-btn.on{background:#111;border-color:#111;color:#fff;font-weight:600}
+.budget-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.budget-kpi{background:#f9f9f9;border-radius:10px;padding:12px 14px}
+.budget-kpi-label{font-size:10px;font-weight:600;color:#aaa;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:4px}
+.budget-kpi-val{font-size:20px;font-weight:600;color:#111}
+.budget-kpi-sub{font-size:11px;color:#aaa;margin-top:2px}
+.budget-bar-wrap{margin-bottom:14px}
+.budget-bar-meta{display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:6px}
+.budget-bar-track{background:#f0f0f0;border-radius:99px;height:8px;overflow:hidden}
+.budget-bar-fill{height:100%;border-radius:99px;background:#111;transition:width 0.5s}
+.budget-bar-fill.over{background:#f43f5e}
+.budget-ip-label{font-size:10px;font-weight:600;color:#aaa;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:10px}
+.budget-ip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+.budget-ip-card{background:#f9f9f9;border-radius:10px;padding:10px 12px}
+.budget-ip-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.budget-ip-name{font-size:13px;font-weight:600;color:#111}
+.budget-ip-pct{font-size:12px;font-weight:600;color:#111}
+.budget-ip-pct.over{color:#f43f5e}
+.budget-ip-bar-track{background:#e5e5e5;border-radius:99px;height:4px;overflow:hidden;margin-bottom:5px}
+.budget-ip-bar-fill{height:100%;border-radius:99px;background:#111}
+.budget-ip-bar-fill.over{background:#f43f5e}
+.budget-ip-nums{display:flex;justify-content:space-between;font-size:11px}
+.budget-ip-used{color:#111;font-weight:500}
+.budget-ip-total{color:#aaa}
+
+/* 발주 현황 */
+.stats-section{margin-bottom:16px}
+.stats-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.section-tag{font-size:10px;font-weight:700;color:#888;letter-spacing:1px;text-transform:uppercase;background:#f0f0f0;padding:3px 8px;border-radius:4px}
+.stats-filter-wrap{display:flex;align-items:center;gap:6px}
+.stats-filter-btn{font-size:12px;padding:4px 10px;border-radius:7px;border:1px solid #e5e5e5;background:#fff;color:#444;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap;font-weight:500}
+.stats-filter-btn.has-selection{background:#111;border-color:#111;color:#fff}
+.header-actions{display:flex;gap:6px;margin-left:auto}
+.btn-sm{font-size:12px;padding:5px 12px;border-radius:7px;background:#fff;color:#555;border:1px solid #e5e5e5;cursor:pointer;font-weight:500}
+.btn-sm:hover{border-color:#bbb}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stat-card{border-radius:12px;padding:16px;background:#fff;border:1px solid #e8e8e8;position:relative;overflow:hidden}
+.stat-card-accent{position:absolute;top:0;left:0;width:3px;height:100%;border-radius:3px 0 0 3px}
+.stat-card.total .stat-card-accent{background:#111}
+.stat-card.new .stat-card-accent{background:#3b82f6}
+.stat-card.reorder .stat-card-accent{background:#f59e0b}
+.stat-card.review .stat-card-accent{background:#f43f5e}
+.sc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;padding-left:8px}
+.sc-label{font-size:21px;font-weight:600;color:#111;line-height:1}
+.sc-count{font-size:21px;font-weight:600;color:#111;line-height:1}
+.sc-divider{border:none;border-top:1px solid #f0f0f0;margin:10px 0 10px 8px}
+.sc-vol-wrap{padding-left:8px}
+.sc-vol-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.sc-vol-label{font-size:13px;color:#333;font-weight:600}
+.sc-vol-val{font-size:13px;font-weight:600;color:#333;text-align:right;margin-bottom:8px}
+.sc-ip-section-label{font-size:11px;font-weight:700;color:#aaa;letter-spacing:0.5px;margin-bottom:6px;margin-top:4px}
+.sc-ip-list{display:flex;flex-direction:column;gap:4px}
+.sc-ip-row{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.sc-ip-name{font-size:13px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:55%}
+.sc-ip-vol{font-size:13px;font-weight:600;color:#333}
+.sc-vol-total{font-size:17px;font-weight:600;color:#333}
+.sc-no-vol{font-size:13px;color:#ccc}
+
+/* 필터 드롭다운 */
+.filter-dropdown{position:relative;display:inline-block}
+.filter-panel{display:none;position:absolute;top:calc(100% + 4px);left:0;background:#fff;border:1px solid #e5e5e5;border-radius:10px;padding:8px;z-index:300;box-shadow:0 8px 24px rgba(0,0,0,0.08);min-width:160px;max-height:260px;overflow-y:auto}
+.filter-panel.open{display:block}
+.filter-panel input[type=text]{width:100%;font-size:12px;padding:5px 9px;border:1px solid #e5e5e5;border-radius:6px;margin-bottom:6px;font-family:inherit;background:#f9f9f9;color:#111;outline:none}
+.filter-panel input[type=text]:focus{border-color:#999}
+.cb-item{display:flex;align-items:center;gap:7px;padding:5px 6px;border-radius:6px;cursor:pointer;font-size:12px;color:#333;user-select:none}
+.cb-item:hover{background:#f5f5f5}
+.cb-item input[type=checkbox]{accent-color:#111;width:13px;height:13px;cursor:pointer;flex-shrink:0}
+.cb-badge{display:inline-block;padding:1px 8px;border-radius:99px;font-size:11px;font-weight:500}
+.cb-badge.all{background:#f0f0f0;color:#555}
+.cb-badge.new{background:#dbeafe;color:#1d4ed8}
+.cb-badge.reorder{background:#fef3c7;color:#92400e}
+.cb-badge.drop{background:#f3f4f6;color:#6b7280}
+.cb-badge.review{background:#ffe4e6;color:#be123c}
+.cb-divider{border:none;border-top:1px solid #f0f0f0;margin:5px 0}
+
+/* 툴바 + 저장 */
+.toolbar{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.save-all-btn{font-size:12px;padding:6px 16px;border-radius:8px;background:#111;color:#fff;border:none;cursor:pointer;font-weight:600;margin-left:auto}
+.save-all-btn:hover{background:#333}
+.save-all-btn.saving{background:#888}
+.save-all-btn.saved{background:#22c55e}
+
+/* 테이블 */
+.table-wrap{overflow-x:auto;overflow-y:auto;max-height:calc(100vh - 360px);border-radius:12px;border:1px solid #e8e8e8;background:#fff}
+table{width:100%;border-collapse:collapse;min-width:1000px}
+thead th{font-weight:600;font-size:10px;color:#888;padding:10px;text-align:center;border-bottom:1px solid #f0f0f0;white-space:nowrap;position:sticky;top:0;z-index:10;background:#fafafa;letter-spacing:0.8px;text-transform:uppercase}
+tbody tr{border-bottom:1px solid #f5f5f5;transition:background 0.1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:#fafafa}
+tbody td{padding:10px;vertical-align:middle}
+td textarea{width:100%;font-size:13px;padding:8px 10px;border:1px solid #eee;border-radius:8px;background:transparent;color:#333;font-family:inherit;resize:none;height:176px;line-height:1.7;outline:none}
+td textarea:focus{border-color:#999}
+
+/* 배지 */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:500}
+.badge-new{background:#dbeafe;color:#1d4ed8}
+.badge-reorder{background:#fef3c7;color:#92400e}
+.badge-drop{background:#f3f4f6;color:#6b7280}
+.badge-review{background:#ffe4e6;color:#be123c}
+
+/* 이미지 셀 */
+.img-cell{width:180px;height:180px;border:1px dashed #ddd;border-radius:10px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#fafafa;position:relative}
+.img-cell:hover{border-color:#999}
+.img-cell .plus{font-size:22px;color:#ccc;cursor:pointer}
+.img-dots{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);display:flex;gap:4px}
+.img-dot{width:5px;height:5px;border-radius:50%;background:rgba(0,0,0,0.15)}
+.img-dot.active{background:#111}
+.img-expand-btn{position:absolute;bottom:5px;right:5px;background:rgba(0,0,0,0.35);color:#fff;border:none;border-radius:5px;font-size:10px;padding:2px 6px;cursor:pointer;display:none;font-family:inherit}
+.img-cell:hover .img-expand-btn{display:block}
+.img-add-more{position:absolute;top:5px;right:5px;width:22px;height:22px;background:rgba(0,0,0,0.25);color:#fff;border-radius:50%;display:none;align-items:center;justify-content:center;font-size:14px;cursor:pointer}
+.img-cell:hover .img-add-more{display:flex}
+
+/* 모달 */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal-img{border-radius:12px;object-fit:contain;max-width:80vw;max-height:85vh}
+.modal-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.1);border:none;color:#fff;font-size:18px;cursor:pointer;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.modal-nav{position:absolute;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.1);border:none;color:#fff;font-size:28px;cursor:pointer;padding:8px 14px;border-radius:8px}
+.modal-nav.prev{left:14px}.modal-nav.next{right:14px}
+.modal-dots{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);display:flex;gap:6px}
+.modal-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.3);cursor:pointer}
+.modal-dot.active{background:#fff}
+.modal-hint{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.4);font-size:11px;white-space:nowrap}
+
+/* 헤더 필터 버튼 */
+.th-wrap{display:flex;flex-direction:column;align-items:center;gap:2px}
+.th-filter-btn{font-size:10px;padding:2px 7px;border-radius:5px;border:1px solid #e5e5e5;background:#fff;color:#555;cursor:pointer;display:inline-flex;align-items:center;gap:2px;font-weight:500;white-space:nowrap}
+.th-filter-btn.on{background:#111;color:#fff;border-color:#111}
+.th-sort-btn{font-size:10px;color:#bbb;cursor:pointer;background:none;border:none;padding:0;font-family:inherit}
+.th-sort-btn.on{color:#111;font-weight:600}
+.ro{font-size:13px;color:#222}
+.ro-sub{font-size:11px;color:#aaa;margin-top:2px}
+
+.toast{position:fixed;bottom:20px;right:20px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;color:#fff;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:2000}
+.toast.show{opacity:1}.toast.ok{background:#22c55e}.toast.err{background:#ef4444}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Buying Plan Dashboard</h1>
+    <p>구글 시트 데이터를 테마별로 집계 — 이미지와 Remark만 웹에서 수정</p>
+  </div>
+  <div class="header-right">
+    <a href="https://docs.google.com/spreadsheets/d/1_Hav5hiugl_xEIdfGJsu_sTG1rQHGoWUMWupoiA8UaE/edit" target="_blank" class="sheet-btn">
+      <img src="https://ssl.gstatic.com/docs/spreadsheets/favicon3.ico" style="width:14px;height:14px"> 구글 시트
+    </a>
+    <div class="sync-pill">
+      <div class="sync-dot loading" id="syncDot"></div>
+      <span id="syncText">연결 중...</span>
+    </div>
+  </div>
+</div>
+
+<!-- 예산 토글 -->
+<div class="budget-toggle" onclick="toggleBudget()">
+  <span>📦</span>
+  <span class="budget-toggle-title">신제품 발주 예산 현황</span>
+  <span class="budget-toggle-arrow" id="budgetArrow">▼</span>
+</div>
+<div class="budget-section" id="budgetSection" style="display:none">
+  <div class="budget-months" id="budgetMonthBtns"></div>
+  <div class="budget-kpi-row" id="budgetSummary"></div>
+  <div class="budget-bar-wrap" id="budgetTotalBar"></div>
+  <div class="budget-ip-label">IP별 예산 현황</div>
+  <div class="budget-ip-grid" id="budgetIpGrid"></div>
+</div>
+
+<!-- 발주 현황 -->
+<div class="stats-section">
+  <div class="stats-header">
+    <span class="section-tag">발주 현황</span>
+    <div class="stats-filter-wrap">
+      <div class="filter-dropdown" id="ddStatsYear">
+        <div class="stats-filter-btn" id="btnStatsYear" onclick="togglePanel('ddStatsYear')">
+          <span id="lblStatsYear">연도 전체</span> ▾
+        </div>
+        <div class="filter-panel" id="panelStatsYear">
+          <label class="cb-item"><input type="checkbox" name="statsYear" value="" onchange="onStatsYearChange(this)"><span class="cb-badge all">전체</span></label>
+          <hr class="cb-divider">
+        </div>
+      </div>
+      <div class="filter-dropdown" id="ddStatsMonth">
+        <div class="stats-filter-btn" id="btnStatsMonth" onclick="togglePanel('ddStatsMonth')">
+          <span id="lblStatsMonth">월 전체</span> ▾
+        </div>
+        <div class="filter-panel" id="panelStatsMonth">
+          <label class="cb-item"><input type="checkbox" name="statsMonth" value="" onchange="onStatsMonthChange(this)"><span class="cb-badge all">전체</span></label>
+          <hr class="cb-divider">
+        </div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn-sm" onclick="loadData()">↻ 새로고침</button>
+      <button class="btn-sm" onclick="exportCSV()">CSV 내보내기</button>
+    </div>
+  </div>
+  <div class="stats-row" id="stats"></div>
+</div>
+
+<div class="toolbar">
+  <div class="filter-dropdown" id="dd-month">
+    <button class="stats-filter-btn" id="btn-month" onclick="togglePanel('dd-month')">
+      <span id="lbl-month">월 필터</span> ▾
+    </button>
+    <div class="filter-panel" id="panel-month">
+      <label class="cb-item"><input type="checkbox" value="" onchange="onMonthFilterChange(this)"><span class="cb-badge all">전체</span></label>
+      <hr class="cb-divider">
+      <div id="opts-month"></div>
+    </div>
+  </div>
+  <button class="save-all-btn" id="saveAllBtn" onclick="saveAll()">💾 전체 저장</button>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead><tr id="headerRow"></tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<div class="modal-overlay" id="modalOverlay">
+  <button class="modal-close" onclick="closeModal()">✕</button>
+  <button class="modal-nav prev" id="modalPrev" onclick="modalNav(-1)">‹</button>
+  <img class="modal-img" id="modalImg" src="" alt="">
+  <button class="modal-nav next" id="modalNext" onclick="modalNav(1)">›</button>
+  <div class="modal-dots" id="modalDots"></div>
+  <div class="modal-hint">스크롤 확대/축소 · ← → 이동 · ESC 닫기</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const API_URL='https://script.google.com/macros/s/AKfycbwlzolfiRMu8zQweluzm6fhOVYTZYyea2ek8sDL3C01c0ogkH3zKgqFRp4tGRo8AfnD/exec';
+const CUR_YEAR=new Date().getFullYear();
+const YEARS=Array.from({length:5},function(_,i){return CUR_YEAR-1+i;});
+const MONTHS=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+const BADGE={신제품:'badge-new',재발주:'badge-reorder',드랍:'badge-drop',검토중:'badge-review'};
+const SORT_COLS=['date','ip','type','theme','cost','order','vol'];
+const BUDGET_UNIT=1000000;
+const IP_ORDER=['B&F','BT21','JUG','MULTI','GD','PLAVE','DT'];
+
+var themes=[],imgMap={};
+var selDates=new Set(),selIPs=new Set(),selTypes=new Set(),selThemes=new Set(),selMonths=new Set();
+var statsYears=new Set([String(CUR_YEAR)]),statsMonths=new Set();
+var gSortCol=null,gSortStep=0;
+var budgetData=null,budgetUpToMonth=null,budgetVisible=false;
+
+function toggleBudget(){
+  budgetVisible=!budgetVisible;
+  document.getElementById('budgetSection').style.display=budgetVisible?'block':'none';
+  document.getElementById('budgetArrow').className='budget-toggle-arrow'+(budgetVisible?' open':'');
+}
+
+function clickSort(col){
+  if(gSortCol!==col){gSortCol=col;gSortStep=1;}
+  else{gSortStep=(gSortStep+1)%3;if(gSortStep===0)gSortCol=null;}
+  SORT_COLS.forEach(function(c){
+    var el=document.getElementById('srt-'+c);if(!el)return;
+    if(c===gSortCol){el.textContent=gSortStep===1?'↑ 정렬':'↓ 정렬';el.classList.add('on');}
+    else{el.textContent='↕ 정렬';el.classList.remove('on');}
+  });
+  render();
+}
+
+function buildHeader(){
+  var cols=[
+    {key:'date',label:'출시일',w:'100px',filter:'date'},
+    {key:'ip',label:'IP',w:'65px',filter:'ip',search:true},
+    {key:'type',label:'구분',w:'80px',filter:'type'},
+    {key:'img',label:'이미지',w:'200px'},
+    {key:'theme',label:'테마',w:'280px',filter:'theme',search:true},
+    {key:'price',label:'판매가',w:'110px'},
+    {key:'cost',label:'평균 원가율',w:'88px',sort:true},
+    {key:'order',label:'총 발주수량',w:'95px',sort:true},
+    {key:'vol',label:'총 매출볼륨',w:'105px',sort:true},
+    {key:'remark',label:'Remark',w:'auto',bold:true},
+  ];
+  var tr=document.getElementById('headerRow');tr.innerHTML='';
+  cols.forEach(function(col){
+    var th=document.createElement('th');th.style.width=col.w;
+    if(!col.filter&&!col.sort){if(col.bold){th.innerHTML='<span style="font-weight:700">'+col.label+'</span>';}else{th.textContent=col.label;}}
+    else{
+      var html='<div class="th-wrap">';
+      if(col.filter){
+        html+='<div class="filter-dropdown" id="dd-'+col.key+'">';
+        html+='<button class="th-filter-btn" id="btn-'+col.key+'" onclick="event.stopPropagation();togglePanel(\'dd-'+col.key+'\')">';
+        html+='<span id="lbl-'+col.key+'">'+col.label+'</span> ▾</button>';
+        html+='<div class="filter-panel" id="panel-'+col.key+'">';
+        if(col.search)html+='<input type="text" id="search-'+col.key+'" placeholder="검색..." oninput="renderFilterOptions(\''+col.key+'\')">';
+        html+='<div id="opts-'+col.key+'"></div></div></div>';
+      }else{html+='<span style="font-size:11px;font-weight:600;color:#888;letter-spacing:0.5px;text-transform:uppercase">'+col.label+'</span>';}
+      var sortKey=col.filter||(col.sort?col.key:null);
+      if(sortKey&&SORT_COLS.indexOf(sortKey)>=0)
+        html+='<button class="th-sort-btn" id="srt-'+sortKey+'" onclick="clickSort(\''+sortKey+'\')">↕ 정렬</button>';
+      html+='</div>';th.innerHTML=html;
+    }
+    tr.appendChild(th);
+  });
+}
+buildHeader();
+
+function renderFilterOptions(key){
+  var si=document.getElementById('search-'+key);
+  var q=si?(si.value||'').toLowerCase():'';
+  var all=Array.from(new Set(themes.map(function(t){return String(t[key]||'');}))).filter(Boolean).sort();
+  var filtered=q?all.filter(function(v){return v.toLowerCase().includes(q);}):all;
+  var div=document.getElementById('opts-'+key);if(!div)return;
+  var selSet=key==='date'?selDates:key==='ip'?selIPs:key==='type'?selTypes:selThemes;
+  var html='<label class="cb-item"><input type="checkbox" value="" onchange="onFilterChange(\''+key+'\',this)"><span class="cb-badge all">전체</span></label><hr class="cb-divider">';
+  filtered.forEach(function(v){
+    var chk=selSet.has(v)?' checked':'';
+    if(key==='type'){var bc=v==='신제품'?'new':v==='재발주'?'reorder':v==='검토중'?'review':'drop';
+      html+='<label class="cb-item"><input type="checkbox" value="'+esc(v)+'"'+chk+' onchange="onFilterChange(\''+key+'\',this)"><span class="cb-badge '+bc+'">'+esc(v)+'</span></label>';
+    }else{html+='<label class="cb-item"><input type="checkbox" value="'+esc(v)+'"'+chk+' onchange="onFilterChange(\''+key+'\',this)"><span>'+esc(v)+'</span></label>';}
+  });
+  div.innerHTML=html;
+}
+
+function onFilterChange(key,cb){
+  var selSet=key==='date'?selDates:key==='ip'?selIPs:key==='type'?selTypes:selThemes;
+  if(cb.value===''){selSet.clear();var div=document.getElementById('opts-'+key);if(div)div.querySelectorAll('input[type=checkbox]').forEach(function(c){if(c.value)c.checked=false;});}
+  else{if(cb.checked)selSet.add(cb.value);else selSet.delete(cb.value);var ac=document.querySelector('#opts-'+key+' input[value=""]');if(ac)ac.checked=false;}
+  var btn=document.getElementById('btn-'+key),lbl=document.getElementById('lbl-'+key);
+  var label={date:'출시일',ip:'IP',type:'구분',theme:'테마'}[key]||key;
+  if(selSet.size===0){if(lbl)lbl.textContent=label;if(btn)btn.classList.remove('on');}
+  else{if(lbl)lbl.textContent=label+'('+selSet.size+')';if(btn)btn.classList.add('on');}
+  render();
+}
+
+function togglePanel(id){
+  var allIds=['ddStatsYear','ddStatsMonth','dd-date','dd-ip','dd-type','dd-theme','dd-month'];
+  allIds.forEach(function(d){var el=document.getElementById(d);if(el&&d!==id){var p=el.querySelector('.filter-panel');if(p)p.classList.remove('open');}});
+  var panel=document.getElementById(id).querySelector('.filter-panel');
+  var opening=!panel.classList.contains('open');
+  panel.classList.toggle('open');
+  if(opening){if(id==='dd-month'){renderMonthFilter();}var key=id.replace('dd-','');if(['date','ip','type','theme'].indexOf(key)>=0){var si=document.getElementById('search-'+key);if(si)si.value='';renderFilterOptions(key);}}
+}
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.filter-dropdown')&&!e.target.closest('.stats-filter-btn'))
+    document.querySelectorAll('.filter-panel').forEach(function(p){p.classList.remove('open');});
+});
+
+function buildStatsYearPanel(){
+  var panel=document.getElementById('panelStatsYear');
+  YEARS.forEach(function(y){var lbl=document.createElement('label');lbl.className='cb-item';var chk=statsYears.has(String(y))?' checked':'';lbl.innerHTML='<input type="checkbox" name="statsYear" value="'+y+'"'+chk+' onchange="onStatsYearChange(this)"><span>'+y+'년</span>';panel.appendChild(lbl);});
+  updateStatsBtn();
+}
+function buildStatsMonthPanel(){
+  var panel=document.getElementById('panelStatsMonth');
+  MONTHS.forEach(function(m){var lbl=document.createElement('label');lbl.className='cb-item';lbl.innerHTML='<input type="checkbox" name="statsMonth" value="'+m+'" onchange="onStatsMonthChange(this)"><span>'+m+'</span>';panel.appendChild(lbl);});
+}
+buildStatsYearPanel();buildStatsMonthPanel();
+
+function onStatsYearChange(cb){
+  if(cb.value===''){statsYears.clear();document.querySelectorAll('input[name="statsYear"]').forEach(function(c){if(c.value)c.checked=false;});}
+  else{if(cb.checked)statsYears.add(cb.value);else statsYears.delete(cb.value);document.querySelector('input[name="statsYear"][value=""]').checked=false;}
+  updateStatsBtn();updateStats();
+}
+function onStatsMonthChange(cb){
+  if(cb.value===''){statsMonths.clear();document.querySelectorAll('input[name="statsMonth"]').forEach(function(c){if(c.value)c.checked=false;});}
+  else{if(cb.checked)statsMonths.add(cb.value);else statsMonths.delete(cb.value);document.querySelector('input[name="statsMonth"][value=""]').checked=false;}
+  updateStatsBtn();updateStats();
+}
+function updateStatsBtn(){
+  var btnY=document.getElementById('btnStatsYear'),lblY=document.getElementById('lblStatsYear');
+  var btnM=document.getElementById('btnStatsMonth'),lblM=document.getElementById('lblStatsMonth');
+  if(statsYears.size===0){lblY.textContent='연도 전체';btnY.classList.remove('has-selection');}
+  else{lblY.textContent=Array.from(statsYears).sort().join(', ')+'년';btnY.classList.add('has-selection');}
+  if(statsMonths.size===0){lblM.textContent='월 전체';btnM.classList.remove('has-selection');}
+  else{lblM.textContent=Array.from(statsMonths).join(', ');btnM.classList.add('has-selection');}
+}
+
+function setSyncStatus(s,t){document.getElementById('syncDot').className='sync-dot '+s;document.getElementById('syncText').textContent=t;}
+
+function renderMonthFilter(){
+  var months=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  var div=document.getElementById('opts-month');if(!div)return;
+  div.innerHTML=months.map(function(m){
+    var chk=selMonths.has(m)?' checked':'';
+    return'<label class="cb-item"><input type="checkbox" value="'+m+'"'+chk+' onchange="onMonthFilterChange(this)"><span>'+m+'</span></label>';
+  }).join('');
+}
+function onMonthFilterChange(cb){
+  if(cb.value===''){
+    selMonths.clear();
+    document.querySelectorAll('#opts-month input[type=checkbox]').forEach(function(c){c.checked=false;});
+  } else {
+    if(cb.checked)selMonths.add(cb.value);else selMonths.delete(cb.value);
+  }
+  var btn=document.getElementById('btn-month');
+  var lbl=document.getElementById('lbl-month');
+  if(selMonths.size>0){
+    lbl.textContent=Array.from(selMonths).sort(function(a,b){return parseInt(a)-parseInt(b);}).join(', ');
+    btn.classList.add('has-selection');
+  } else {
+    lbl.textContent='월 필터';
+    btn.classList.remove('has-selection');
+  }
+  render();
+}
+function showToast(msg,type){type=type||'ok';var t=document.getElementById('toast');t.textContent=msg;t.className='toast '+type+' show';setTimeout(function(){t.className='toast';},2500);}
+
+function apiCall(params){
+  var url=new URL(API_URL);url.searchParams.set('action',params.action||'');
+  return fetch(url.toString(),{method:'POST',body:JSON.stringify(params),headers:{'Content-Type':'text/plain'},mode:'cors'})
+    .then(function(r){return r.text();}).then(function(t){try{return JSON.parse(t);}catch(e){throw new Error('파싱실패');}});
+}
+function uploadImageToServer(base64,fileName){
+  var url=new URL(API_URL);url.searchParams.set('action','uploadImage');
+  return fetch(url.toString(),{method:'POST',body:JSON.stringify({action:'uploadImage',base64:base64,fileName:fileName}),headers:{'Content-Type':'text/plain'},mode:'cors'})
+    .then(function(r){return r.text();}).then(function(t){try{return JSON.parse(t);}catch(e){throw new Error('파싱실패');}});
+}
+function fixImgUrl(url){
+  if(!url)return'';var m=url.match(/id=([a-zA-Z0-9_-]+)/);
+  return m?'https://lh3.googleusercontent.com/d/'+m[1]:url;
+}
+
+function loadData(){
+  setSyncStatus('loading','불러오는 중...');
+  apiCall({action:'getAll'}).then(function(data){
+    if(data.error)throw new Error(data.error);
+    themes=data.themes.map(function(t){
+      var obj={};
+      Object.keys(t).forEach(function(k){obj[k]=(t[k]===null||t[k]===undefined)?'':String(t[k]);});
+      // 구분 컬럼 키 이름 호환 처리 (시트 컬럼명이 다를 경우 대비)
+      if(!obj.type){obj.type=obj['구분']||obj['division']||obj['type']||'';}
+      // 날짜 파싱 - Date 객체 문자열 처리
+      if(obj.date){
+        var d=new Date(obj.date);
+        if(!isNaN(d.getTime())){
+          var y=d.getFullYear();
+          var mo=String(d.getMonth()+1).padStart(2,'0');
+          var da=String(d.getDate()).padStart(2,'0');
+          obj.date=y+'-'+mo+'-'+da;
+          obj.year=String(y);
+          obj.month=parseInt(mo)+'월';
+        }
+      }
+      if(obj.imgData)obj.imgData=obj.imgData.split(',').map(function(u){return fixImgUrl(u.trim());}).filter(Boolean).join(',');
+      obj._remark=obj.remark;obj._imgData=obj.imgData;
+      return obj;
+    });
+    setSyncStatus('ok','구글 시트 연동됨');
+    render();showToast('데이터를 불러왔습니다');
+    loadBudget();
+  }).catch(function(e){setSyncStatus('err','연결 실패');showToast('불러오기 실패: '+e.message,'err');render();});
+}
+
+function getImgs(i){
+  var t=themes[i];if(!t)return[];
+  var src=imgMap[i]!==undefined?imgMap[i]:(t._imgData||'');
+  return src?src.split(',').map(function(u){return u.trim();}).filter(Boolean):[];
+}
+
+function filteredThemes(){
+  var list=themes.filter(function(t){
+    if(selDates.size>0&&!selDates.has(t.date))return false;
+    if(selIPs.size>0&&!selIPs.has(t.ip))return false;
+    if(selTypes.size>0&&!selTypes.has(t.type))return false;
+    if(selThemes.size>0&&!selThemes.has(t.theme))return false;
+    if(selMonths.size>0&&!selMonths.has(t.month))return false;
+    return true;
+  }).slice();
+  if(!gSortCol){
+    return list.sort(function(a,b){
+      var da=String(a.date||''),db=String(b.date||'');
+      return da<db?-1:da>db?1:0;
+    });
+  }
+  var d=gSortStep===1?1:-1,c=gSortCol;
+  return list.sort(function(a,b){
+    var va,vb;
+    if(c==='vol'){va=parseVol(a.vol);vb=parseVol(b.vol);}
+    else if(c==='order'||c==='cost'){va=parseNum(a[c]);vb=parseNum(b[c]);}
+    else{va=String(a[c]||'');vb=String(b[c]||'');}
+    return va<vb?-d:va>vb?d:0;
+  });
+}
+
+function parseNum(v){return parseFloat(String(v).replace(/,/g,'').replace(/[^0-9.]/g,''))||0;}
+function parseVol(v){
+  if(!v)return 0;var s=String(v).replace(/,/g,'');
+  if(s.includes('억')){var m=s.match(/([\d.]+)억/);return m?parseFloat(m[1])*1e8:0;}
+  if(s.includes('만')){var m=s.match(/([\d.]+)만/);return m?parseFloat(m[1])*1e4:0;}
+  return parseFloat(s.replace(/[^0-9.]/g,''))||0;
+}
+function fmtVol(n){if(!n)return'-';return(n/1e8).toFixed(1)+'억원';}
+function fmtVolDetail(n){if(!n)return'-';if(n>=1e8)return(n/1e8).toFixed(1)+'억원';if(n>=1e4)return Math.round(n/1e4).toLocaleString()+'만원';return n.toLocaleString()+'원';}
+function fmtNum(v){var n=parseInt(String(v).replace(/,/g,''));return isNaN(n)||n===0?'-':n.toLocaleString();}
+function fmtMan(n){if(!n&&n!==0)return'-';var abs=Math.abs(n);if(abs>=1e8)return(n/1e8).toFixed(1)+'억원';if(abs>=1e4)return Math.round(n/1e4).toLocaleString()+'만원';return n.toLocaleString()+'원';}
+function esc(v){if(v===null||v===undefined)return'';return String(v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/'/g,'&#39;');}
+
+function buildIpVolMap(subset){
+  var m={};subset.forEach(function(t){var k=(t.ip||'(미입력)').trim();m[k]=(m[k]||0)+parseVol(t.vol);});
+  return Object.entries(m).filter(function(e){return e[1]>0;}).sort(function(a,b){return b[1]-a[1];});
+}
+
+function updateStats(){
+  var base=themes;
+  if(statsYears.size>0)base=base.filter(function(t){return statsYears.has(String(t.year));});
+  if(statsMonths.size>0)base=base.filter(function(t){return statsMonths.has(t.month);});
+  var groups=[
+    {key:'total',label:'총 합계',rows:base},
+    {key:'new',label:'신제품',rows:base.filter(function(t){return t.type==='신제품';})},
+    {key:'reorder',label:'재발주',rows:base.filter(function(t){return t.type==='재발주';})},
+    {key:'review',label:'검토중',rows:base.filter(function(t){return t.type==='검토중';})},
+  ];
+  document.getElementById('stats').innerHTML=groups.map(function(g){
+    var grand=g.rows.reduce(function(s,t){return s+parseVol(t.vol);},0);
+    var ipList=buildIpVolMap(g.rows);
+    var ipHtml=ipList.length?ipList.slice(0,5).map(function(e){return'<div class="sc-ip-row"><span class="sc-ip-name">'+esc(e[0])+'</span><span class="sc-ip-vol">'+fmtVol(e[1])+'</span></div>';}).join(''):'<span class="sc-no-vol">-</span>';
+    return'<div class="stat-card '+g.key+'"><div class="stat-card-accent"></div>'+
+      '<div class="sc-top"><span class="sc-label">'+g.label+'</span><span class="sc-count">'+g.rows.length+'</span></div>'+
+      '<hr class="sc-divider">'+
+      '<div class="sc-vol-wrap"><div class="sc-ip-row"><span class="sc-vol-total">총 매출볼륨</span><span class="sc-vol-total">'+(grand>0?fmtVol(grand):'-')+'</span></div><hr style="border:none;border-top:1px solid #f0f0f0;margin:6px 0">'+
+      '<div class="sc-ip-section-label">IP별 매출볼륨</div><div class="sc-ip-list">'+ipHtml+'</div></div></div>';
+  }).join('');
+}
+
+function render(){
+  updateStats();
+  var fr=filteredThemes();
+  var tbody=document.getElementById('tbody');tbody.innerHTML='';
+  if(!fr.length){var tr=document.createElement('tr');tr.innerHTML='<td colspan="10" style="text-align:center;padding:40px;color:#aaa;font-size:13px">데이터가 없습니다.</td>';tbody.appendChild(tr);return;}
+  fr.forEach(function(t){
+    var gi=themes.indexOf(t);
+    var imgs=getImgs(gi);
+    var tr=document.createElement('tr');
+    var imgInner='';
+    if(imgs.length===0){imgInner='<span class="plus">+</span>';}
+    else{
+      var dots='';var dc=Math.min(imgs.length,5);
+      for(var d=0;d<dc;d++)dots+='<span class="img-dot'+(d===0?' active':'')+'"></span>';
+      imgInner='<img src="'+imgs[0]+'" width="160" height="160" style="object-fit:cover;display:block;border-radius:8px;cursor:pointer" onclick="openModal('+gi+',0)">'
+        +'<div class="img-dots">'+dots+'</div>'
+        +'<button class="img-expand-btn" onclick="event.stopPropagation();openModal('+gi+',0)">확대</button>'
+        +'<div class="img-add-more" onclick="event.stopPropagation();triggerFile('+gi+')">+</div>';
+    }
+    var priceDisp=(t.price||'').replace(/~/g,' ~ ');
+    tr.innerHTML=
+      '<td class="ro" style="text-align:center;font-size:12px;color:#666">'+esc(t.date)+'</td>'+
+      '<td class="ro" style="text-align:center;font-weight:600">'+esc(t.ip)+'</td>'+
+      '<td style="text-align:center"><span class="badge '+(BADGE[t.type]||'badge-drop')+'">'+esc(t.type)+'</span></td>'+
+      '<td><div class="img-cell" id="ic-'+gi+'">'+imgInner+'<input type="file" accept="image/*" multiple style="display:none;position:absolute" id="fi-'+gi+'"></div></td>'+
+      '<td class="ro"><strong style="font-size:14px;font-weight:600">'+esc(t.theme)+'</strong><div class="ro-sub">'+esc(t.itemCount)+'개 품목</div></td>'+
+      '<td class="ro" style="text-align:center;font-size:12px">'+esc(priceDisp)+'</td>'+
+      '<td class="ro" style="text-align:center">'+(t.cost?t.cost+'%':'-')+'</td>'+
+      '<td class="ro" style="text-align:right">'+fmtNum(t.order)+'</td>'+
+      '<td class="ro" style="text-align:right">'+fmtVolDetail(parseVol(t.vol))+'</td>'+
+      '<td><textarea onchange="setRemark('+gi+',this.value)">'+esc(t._remark)+'</textarea></td>';
+    var fi=tr.querySelector('#fi-'+gi);
+    fi.addEventListener('change',function(){handleImg(gi,this);});
+    tr.querySelector('#ic-'+gi).addEventListener('click',function(e){
+      if(e.target.tagName==='BUTTON'||e.target.tagName==='IMG')return;
+      if(imgs.length===0)fi.click();
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+function setRemark(i,v){if(themes[i])themes[i]._remark=v;}
+function triggerFile(i){var fi=document.getElementById('fi-'+i);if(fi){fi.value='';fi.click();}}
+
+function handleImg(i,inp){
+  var t=themes[i];if(!t)return;
+  var files=Array.from(inp.files);if(!files.length)return;
+  var existing=getImgs(i).slice();
+  var total=files.length;
+  showToast('업로드 중... (0/'+total+')');
+  // 순차 처리: 한 장씩 업로드 후 다음 장
+  function uploadNext(idx){
+    if(idx>=files.length){
+      imgMap[i]=existing.join(',');t._imgData=imgMap[i];render();
+      showToast('업로드 완료! 저장 중...');
+      apiCall({action:'updateTheme',date:t.date,ip:t.ip,type:t.type,theme:t.theme,remark:t._remark,imgData:t._imgData})
+      .then(function(res){if(res.error)throw new Error(res.error);t.imgData=t._imgData;showToast(total+'장 저장 완료!');})
+      .catch(function(e){showToast('저장 실패: '+e.message,'err');});
+      return;
+    }
+    var f=files[idx];
+    var reader=new FileReader();
+    reader.onload=function(e){
+      showToast('업로드 중... ('+(idx+1)+'/'+total+')');
+      uploadImageToServer(e.target.result,f.name).then(function(res){
+        if(res.error)throw new Error(res.error);
+        existing.push(res.url);
+        uploadNext(idx+1);
+      }).catch(function(e){showToast('업로드 실패: '+e.message,'err');});
+    };
+    reader.readAsDataURL(f);
+  }
+  uploadNext(0);
+}
+
+function saveAll(){
+  var btn=document.getElementById('saveAllBtn');
+  var changed=themes.filter(function(t){return t._remark!==t.remark||t._imgData!==t.imgData;});
+  if(!changed.length){showToast('변경된 내용이 없습니다');return;}
+  btn.textContent='저장 중...';btn.className='save-all-btn saving';btn.disabled=true;
+  Promise.all(changed.map(function(t){
+    return apiCall({action:'updateTheme',date:t.date,ip:t.ip,type:t.type,theme:t.theme,remark:t._remark,imgData:t._imgData||''})
+    .then(function(res){if(res.error)throw new Error(res.error);t.remark=t._remark;t.imgData=t._imgData;});
+  })).then(function(){
+    showToast('전체 저장 완료! ('+changed.length+'개)');
+    btn.textContent='💾 전체 저장';btn.className='save-all-btn saved';
+    setTimeout(function(){btn.textContent='💾 전체 저장';btn.className='save-all-btn';btn.disabled=false;},1500);
+  }).catch(function(e){showToast('저장 실패: '+e.message,'err');btn.textContent='💾 전체 저장';btn.className='save-all-btn';btn.disabled=false;});
+}
+
+function loadBudget(){
+  apiCall({action:'getBudget'}).then(function(data){
+    if(data.error)throw new Error(data.error);
+    budgetData=data;
+    var now=new Date();
+    var curLabel=String(now.getFullYear()).slice(2)+'/'+String(now.getMonth()+1).padStart(2,'0');
+    budgetUpToMonth=data.months.includes(curLabel)?curLabel:data.months[data.months.length-1];
+    buildBudgetMonthBtns();renderBudget();
+  }).catch(function(e){console.warn('예산 로드 실패:',e.message);});
+}
+
+function buildBudgetMonthBtns(){
+  var div=document.getElementById('budgetMonthBtns');div.innerHTML='';
+  budgetData.months.forEach(function(m){
+    var btn=document.createElement('button');
+    btn.className='budget-month-btn'+(m===budgetUpToMonth?' on':'');
+    btn.textContent=m;
+    btn.onclick=function(){budgetUpToMonth=m;buildBudgetMonthBtns();renderBudget();};
+    div.appendChild(btn);
+  });
+}
+
+function renderBudget(){
+  if(!budgetData||!budgetUpToMonth)return;
+  var months=budgetData.months;
+  var selectedMonths=months.slice(0,months.indexOf(budgetUpToMonth)+1);
+  var totalBudget=selectedMonths.reduce(function(s,m){return s+(budgetData.totalByMonth[m]||0);},0)*BUDGET_UNIT;
+  var usedByIP={};
+  themes.forEach(function(t){
+    var dateStr=String(t.date||'');
+    var parts=dateStr.split('-');if(parts.length<2)return;
+    var yr=parts[0].length===4?parts[0].slice(2):parts[0];
+    var mo=String(parseInt(parts[1])).padStart(2,'0');
+    var label=yr+'/'+mo;
+    if(selectedMonths.indexOf(label)>=0){
+      var ip=(t.ip||'').trim();
+      usedByIP[ip]=(usedByIP[ip]||0)+(parseFloat(String(t.costTotal).replace(/,/g,''))||0);
+    }
+  });
+  var totalUsed=Object.values(usedByIP).reduce(function(s,v){return s+v;},0);
+  var pct=totalBudget>0?Math.round(totalUsed/totalBudget*100):0;
+  var remain=totalBudget-totalUsed;
+
+  document.getElementById('budgetSummary').innerHTML=
+    kpi('총 예산',fmtMan(totalBudget),'~'+budgetUpToMonth+' 누적')+
+    kpi('누적 사용',fmtMan(totalUsed),'원가 기준')+
+    kpi('잔여 예산',fmtMan(remain),remain>=0?'여유':'예산 초과')+
+    kpi('사용률',pct+'%',remain>=0?'잔여 '+fmtMan(remain):'초과 '+fmtMan(-remain));
+
+  var barPct=Math.min(pct,100);
+  document.getElementById('budgetTotalBar').innerHTML=
+    '<div class="budget-bar-meta"><span>전체 진행률</span><span>'+fmtMan(totalUsed)+' / '+fmtMan(totalBudget)+'</span></div>'+
+    '<div class="budget-bar-track"><div class="budget-bar-fill'+(pct>100?' over':'')+'" style="width:'+barPct+'%"></div></div>';
+
+  var ipGrid=document.getElementById('budgetIpGrid');ipGrid.innerHTML='';
+  var ipKeys=Object.keys(budgetData.ipBudget);
+  var sorted=IP_ORDER.filter(function(ip){return ipKeys.indexOf(ip)>=0;});
+  ipKeys.forEach(function(ip){if(IP_ORDER.indexOf(ip)<0)sorted.push(ip);});
+  sorted.forEach(function(ip){
+    var ipBudget=selectedMonths.reduce(function(s,m){return s+(budgetData.ipBudget[ip][m]||0);},0)*BUDGET_UNIT;
+    if(!ipBudget)return;
+    var ipUsed=usedByIP[ip]||0;
+    var ipPct=ipBudget>0?Math.round(ipUsed/ipBudget*100):0;
+    var card=document.createElement('div');card.className='budget-ip-card';
+    card.innerHTML=
+      '<div class="budget-ip-top"><span class="budget-ip-name">'+esc(ip)+'</span>'+
+      '<span class="budget-ip-pct'+(ipPct>100?' over':'')+'">'+ipPct+'%</span></div>'+
+      '<div class="budget-ip-bar-track"><div class="budget-ip-bar-fill'+(ipPct>100?' over':'')+'" style="width:'+Math.min(ipPct,100)+'%"></div></div>'+
+      '<div class="budget-ip-nums"><span class="budget-ip-used">'+fmtMan(ipUsed)+'</span><span class="budget-ip-total">예산 '+fmtMan(ipBudget)+'</span></div>';
+    ipGrid.appendChild(card);
+  });
+}
+
+function kpi(label,val,sub){
+  return'<div class="budget-kpi"><div class="budget-kpi-label">'+label+'</div><div class="budget-kpi-val">'+val+'</div><div class="budget-kpi-sub">'+sub+'</div></div>';
+}
+
+var modalScale=1,modalIdx=0,modalImgs=[];
+function updateModalDots(){
+  var dc=Math.min(modalImgs.length,5);var html='';
+  for(var d=0;d<dc;d++)html+='<span class="modal-dot'+(d===modalIdx?' active':'')+'" onclick="modalNav('+(d-modalIdx)+')"></span>';
+  document.getElementById('modalDots').innerHTML=html;
+}
+function openModal(i,idx){
+  modalImgs=getImgs(i);if(!modalImgs.length)return;
+  modalIdx=idx||0;modalScale=1;
+  var img=document.getElementById('modalImg');img.src=modalImgs[modalIdx];img.style.transform='scale(1)';
+  document.getElementById('modalPrev').style.display=modalImgs.length>1?'flex':'none';
+  document.getElementById('modalNext').style.display=modalImgs.length>1?'flex':'none';
+  updateModalDots();
+  document.getElementById('modalOverlay').className='modal-overlay show';
+}
+function modalNav(dir){
+  if(modalImgs.length<2)return;
+  modalIdx=(modalIdx+dir+modalImgs.length)%modalImgs.length;modalScale=1;
+  var img=document.getElementById('modalImg');img.src=modalImgs[modalIdx];img.style.transform='scale(1)';
+  updateModalDots();
+}
+function closeModal(){document.getElementById('modalOverlay').className='modal-overlay';modalScale=1;}
+document.getElementById('modalOverlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.getElementById('modalImg').addEventListener('wheel',function(e){
+  e.preventDefault();modalScale+=e.deltaY<0?0.1:-0.1;modalScale=Math.min(Math.max(modalScale,0.3),5);
+  this.style.transform='scale('+modalScale+')';
+},{passive:false});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape')closeModal();
+  else if(e.key==='ArrowLeft')modalNav(-1);
+  else if(e.key==='ArrowRight')modalNav(1);
+});
+
+function exportCSV(){
+  var hdr=['출시일','IP','구분','테마','품목수','판매가','평균원가율(%)','총발주수량','총매출볼륨','Remark'];
+  var rows=[hdr.join(',')].concat(themes.map(function(t){
+    return[t.date,t.ip,t.type,t.theme,t.itemCount,t.price,t.cost,t.order,t.vol,t.remark].map(function(v){return'"'+(v||'').replace(/"/g,'""')+'"';}).join(',');
+  }));
+  var blob=new Blob(['\uFEFF'+rows.join('\n')],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='바잉플랜_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
+}
+
+loadData();
+</script>
+</body>
+</html>
