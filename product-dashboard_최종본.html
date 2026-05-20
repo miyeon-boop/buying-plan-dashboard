@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <style>
-@import url("https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap");
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Nanum Gothic',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;color:#111;background:#f5f5f5;padding:20px;line-height:1.5}
+body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;color:#111;background:#f5f5f5;padding:20px;line-height:1.5}
 
 /* 헤더 */
 .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
@@ -86,8 +86,8 @@ body{font-family:'Nanum Gothic',-apple-system,BlinkMacSystemFont,'Segoe UI',sans
 .sc-ip-name{font-size:13px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:55%}
 .sc-ip-vol{font-size:13px;font-weight:600;color:#333}
 .sc-vol-total{font-size:17px;font-weight:600;color:#333}
-.st-table{width:100%;border-collapse:collapse;font-size:13px;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
-.st-table th{background:#f3f4f6;font-weight:700;padding:11px 16px;text-align:left;border-bottom:2px solid #e5e5e5;white-space:nowrap;color:#888;font-size:11px;letter-spacing:0.5px;text-transform:uppercase}.st-table th.ip-col{color:#ccc;font-weight:400;font-size:10px;border-left:1px solid #eee}
+.st-table-wrap{position:relative}.st-unit{position:absolute;top:-22px;right:0;font-size:11px;color:#aaa;font-weight:500}.st-table{width:100%;border-collapse:collapse;font-size:13px;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.st-table th{background:#f0f0f0;font-weight:700;padding:13px 16px;text-align:left;border-bottom:2px solid #d5d5d5;white-space:nowrap;color:#555;font-size:13px;letter-spacing:0}.st-table th.ip-col{color:#aaa;font-weight:500;font-size:11px;border-left:1px solid #eee}
 .st-table td.ip-col{color:#bbb;font-weight:400;font-size:11px;border-left:1px solid #f0f0f0;background:#fafafa}
 .st-table tr.row-total td.ip-col{background:#f5f5f5}
 .st-table th.sep{border-left:2px solid #ddd}
@@ -542,6 +542,7 @@ function parseVol(v){
   return parseFloat(s.replace(/[^0-9.]/g,''))||0;
 }
 function fmtVol(n){if(!n)return'-';return(n/1e8).toFixed(1)+'억원';}
+function fmtVolSt(n){if(!n)return'-';return(n/1e8).toFixed(1);}
 function fmtVolDetail(n){if(!n)return'-';if(n>=1e8)return(n/1e8).toFixed(1)+'억원';if(n>=1e4)return Math.round(n/1e4).toLocaleString()+'만원';return n.toLocaleString()+'원';}
 function fmtNum(v){var n=parseInt(String(v).replace(/,/g,''));return isNaN(n)||n===0?'-':n.toLocaleString();}
 function fmtMan(n){if(!n&&n!==0)return'-';var abs=Math.abs(n);if(abs>=1e8)return(n/1e8).toFixed(1)+'억원';if(abs>=1e4)return Math.round(n/1e4).toLocaleString()+'만원';return n.toLocaleString()+'원';}
@@ -580,12 +581,12 @@ function updateStats(){
     var label='<span class="st-type-label '+g.key+'"><span class="st-type-dot st-dot-'+g.key+'"></span>'+g.label+'</span>';
     var rowCls=g.key==='total'?'row-total':'';
     var ipCells=allIps.map(function(ip){
-      return'<td class="num ip-col">'+(ipMap[ip]?fmtVol(ipMap[ip]):'-')+'</td>';
+      return'<td class="num ip-col">'+(ipMap[ip]?fmtVolSt(ipMap[ip]):'-')+'</td>';
     }).join('');
-    return'<tr class="'+rowCls+'"><td>'+label+'</td><td class="num highlight">'+g.rows.length+'</td><td class="num highlight">'+(grand>0?fmtVol(grand):'-')+'</td>'+ipCells+'</tr>';
+    return'<tr class="'+rowCls+'"><td>'+label+'</td><td class="num highlight">'+g.rows.length+'</td><td class="num highlight">'+(grand>0?fmtVolSt(grand):'-')+'</td>'+ipCells+'</tr>';
   }).join('');
 
-  document.getElementById('stats').innerHTML='<table class="st-table"><thead>'+thead+'</thead><tbody>'+tbody+'</tbody></table>';
+  document.getElementById('stats').innerHTML='<div class="st-table-wrap"><span class="st-unit">(단위: 억원)</span><table class="st-table"><thead>'+thead+'</thead><tbody>'+tbody+'</tbody></table></div>';
 }
 
 function render(){
