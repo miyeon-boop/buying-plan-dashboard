@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <style>
+@import url("https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&display=swap");
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;color:#111;background:#f5f5f5;padding:20px;line-height:1.5}
+body{font-family:'Nanum Gothic',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:13px;color:#111;background:#f5f5f5;padding:20px;line-height:1.5}
 
 /* 헤더 */
 .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
@@ -64,7 +65,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .btn-sm{font-size:12px;padding:5px 12px;border-radius:7px;background:#fff;color:#555;border:1px solid #e5e5e5;cursor:pointer;font-weight:500}
 .btn-sm:hover{border-color:#bbb}
 
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stats-row{width:100%;border-collapse:collapse;display:table}.stats-row-table{width:100%;border-collapse:collapse;font-size:13px}
 .stat-card{border-radius:12px;padding:16px;background:#fff;border:1px solid #e8e8e8;position:relative;overflow:hidden}
 .stat-card-accent{position:absolute;top:0;left:0;width:3px;height:100%;border-radius:3px 0 0 3px}
 .stat-card.total .stat-card-accent{background:#111}
@@ -85,6 +86,30 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .sc-ip-name{font-size:13px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:55%}
 .sc-ip-vol{font-size:13px;font-weight:600;color:#333}
 .sc-vol-total{font-size:17px;font-weight:600;color:#333}
+.st-table{width:100%;border-collapse:collapse;font-size:13px;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.st-table th{background:#f3f4f6;font-weight:700;padding:11px 16px;text-align:left;border-bottom:2px solid #e5e5e5;white-space:nowrap;color:#888;font-size:11px;letter-spacing:0.5px;text-transform:uppercase}.st-table th.ip-col{color:#ccc;font-weight:400;font-size:10px;border-left:1px solid #eee}
+.st-table td.ip-col{color:#bbb;font-weight:400;font-size:11px;border-left:1px solid #f0f0f0;background:#fafafa}
+.st-table tr.row-total td.ip-col{background:#f5f5f5}
+.st-table th.sep{border-left:2px solid #ddd}
+.st-table td.sep{border-left:2px solid #eee}
+.st-table th.num{text-align:right}
+.st-table td{padding:11px 16px;border-bottom:1px solid #f0f0f0;vertical-align:middle;background:#fff;color:#444;font-size:13px}
+.st-table td.num{text-align:right;font-weight:600;color:#333}
+.st-table td.num.highlight{font-size:16px;font-weight:800;color:#111}
+.st-table tbody tr.row-total td.num.highlight{font-size:19px;font-weight:800;color:#111}
+.st-table tbody tr:hover td{background:#f9f9f9}
+.st-table tbody tr.row-total td{background:#f8f8f8;border-top:2px solid #e0e0e0;border-bottom:2px solid #e0e0e0}
+.st-table tbody tr.row-total td.num{font-size:14px;font-weight:700;color:#111}
+.st-type-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;flex-shrink:0}
+.st-type-label{display:flex;align-items:center;font-weight:700}
+.st-type-label.total{color:#111;font-size:14px}
+.st-type-label.new{color:#3b82f6}
+.st-type-label.reorder{color:#f59e0b}
+.st-type-label.review{color:#f43f5e}
+.st-dot-total{background:#111}
+.st-dot-new{background:#3b82f6}
+.st-dot-reorder{background:#f59e0b}
+.st-dot-review{background:#f43f5e}
 .sc-no-vol{font-size:13px;color:#ccc}
 
 /* 필터 드롭다운 */
@@ -537,16 +562,30 @@ function updateStats(){
     {key:'reorder',label:'재발주',rows:base.filter(function(t){return t.type==='재발주';})},
     {key:'review',label:'검토중',rows:base.filter(function(t){return t.type==='검토중';})},
   ];
-  document.getElementById('stats').innerHTML=groups.map(function(g){
+  // 모든 IP 목록 수집
+  var allIps=[];
+  groups.forEach(function(g){
+    buildIpVolMap(g.rows).forEach(function(e){if(!allIps.includes(e[0]))allIps.push(e[0]);});
+  });
+  allIps.sort();
+
+  // 헤더
+  var thead='<tr><th>구분</th><th class="num">건수</th><th class="num">총매출볼륨</th>'+
+    allIps.map(function(ip){return'<th class="num ip-col">'+esc(ip)+'</th>';}).join('')+'</tr>';
+
+  // 행
+  var tbody=groups.map(function(g){
     var grand=g.rows.reduce(function(s,t){return s+parseVol(t.vol);},0);
-    var ipList=buildIpVolMap(g.rows);
-    var ipHtml=ipList.length?ipList.slice(0,5).map(function(e){return'<div class="sc-ip-row"><span class="sc-ip-name">'+esc(e[0])+'</span><span class="sc-ip-vol">'+fmtVol(e[1])+'</span></div>';}).join(''):'<span class="sc-no-vol">-</span>';
-    return'<div class="stat-card '+g.key+'"><div class="stat-card-accent"></div>'+
-      '<div class="sc-top"><span class="sc-label">'+g.label+'</span><span class="sc-count">'+g.rows.length+'</span></div>'+
-      '<hr class="sc-divider">'+
-      '<div class="sc-vol-wrap"><div class="sc-ip-row"><span class="sc-vol-total">총 매출볼륨</span><span class="sc-vol-total">'+(grand>0?fmtVol(grand):'-')+'</span></div><hr style="border:none;border-top:1px solid #f0f0f0;margin:6px 0">'+
-      '<div class="sc-ip-section-label">IP별 매출볼륨</div><div class="sc-ip-list">'+ipHtml+'</div></div></div>';
+    var ipMap=Object.fromEntries(buildIpVolMap(g.rows));
+    var label='<span class="st-type-label '+g.key+'"><span class="st-type-dot st-dot-'+g.key+'"></span>'+g.label+'</span>';
+    var rowCls=g.key==='total'?'row-total':'';
+    var ipCells=allIps.map(function(ip){
+      return'<td class="num ip-col">'+(ipMap[ip]?fmtVol(ipMap[ip]):'-')+'</td>';
+    }).join('');
+    return'<tr class="'+rowCls+'"><td>'+label+'</td><td class="num highlight">'+g.rows.length+'</td><td class="num highlight">'+(grand>0?fmtVol(grand):'-')+'</td>'+ipCells+'</tr>';
   }).join('');
+
+  document.getElementById('stats').innerHTML='<table class="st-table"><thead>'+thead+'</thead><tbody>'+tbody+'</tbody></table>';
 }
 
 function render(){
