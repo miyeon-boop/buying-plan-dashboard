@@ -670,11 +670,15 @@ function renderIpChart(groups, allIps){
       var v=ipMap[ip]||0;
       if(!v)return'';
       var segW=Math.round(v/maxVal*100);
-      var label=fmtVolSt(v)+'억';
+      var amt=fmtVolSt(v)+'억';
       var showLabel=segW>=5;
+      var showIp=segW>=8;
+      var labelHtml=showLabel
+        ? '<span class="ip-chart-seg-label">'+(showIp?esc(ip)+' ':'')+amt+'</span>'
+        : '';
       return'<div class="ip-chart-seg" style="width:'+segW+'%;background:'+ipColorMap[ip]+(!isTotal?';opacity:0.45':'')+'">'+
-        (showLabel?'<span class="ip-chart-seg-label">'+label+'</span>':'')+
-        '<div class="ip-chart-seg-tooltip">'+esc(ip)+' '+label+'</div>'+
+        labelHtml+
+        '<div class="ip-chart-seg-tooltip">'+esc(ip)+' '+amt+'</div>'+
       '</div>';
     }).join('');
 
