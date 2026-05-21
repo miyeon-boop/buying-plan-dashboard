@@ -65,7 +65,7 @@ body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-s
 .btn-sm{font-size:12px;padding:5px 12px;border-radius:7px;background:#fff;color:#555;border:1px solid #e5e5e5;cursor:pointer;font-weight:500}
 .btn-sm:hover{border-color:#bbb}
 
-.stats-row{width:100%;border-collapse:collapse;display:table}.stats-row-table{width:100%;border-collapse:collapse;font-size:13px}
+.stats-row{width:100%}.stats-row-table{width:100%;border-collapse:collapse;font-size:13px}
 .stat-card{border-radius:12px;padding:16px;background:#fff;border:1px solid #e8e8e8;position:relative;overflow:hidden}
 .stat-card-accent{position:absolute;top:0;left:0;width:3px;height:100%;border-radius:3px 0 0 3px}
 .stat-card.total .stat-card-accent{background:#111}
@@ -86,23 +86,52 @@ body{font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-s
 .sc-ip-name{font-size:13px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:55%}
 .sc-ip-vol{font-size:13px;font-weight:600;color:#333}
 .sc-vol-total{font-size:17px;font-weight:600;color:#333}
-.st-table-wrap{position:relative}.st-unit{position:absolute;top:-22px;right:0;font-size:11px;color:#aaa;font-weight:500}.st-table{width:100%;border-collapse:collapse;font-size:13px;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
-.st-table th{background:#f0f0f0;font-weight:700;padding:13px 16px;text-align:left;border-bottom:2px solid #d5d5d5;white-space:nowrap;color:#555;font-size:13px;letter-spacing:0}.st-table th.ip-col{color:#aaa;font-weight:500;font-size:11px;border-left:1px solid #eee}
-.st-table td.ip-col{color:#bbb;font-weight:400;font-size:11px;border-left:1px solid #f0f0f0;background:#fafafa}
-.st-table tr.row-total td.ip-col{background:#f5f5f5}
-.st-table th.sep{border-left:2px solid #ddd}
-.st-table td.sep{border-left:2px solid #eee}
+.st-table-wrap{position:relative;width:200px;overflow:hidden}.st-unit{display:none}.st-table{border-collapse:collapse;font-size:13px;table-layout:fixed;width:200px}
+.st-table th{background:#f5f5f5;font-weight:700;padding:0 8px;height:44px;text-align:left;border-bottom:2px solid #e0e0e0;color:#666;font-size:12px;letter-spacing:0;overflow:hidden}
+.st-table th.ip-col{color:#999;font-weight:600;font-size:12px;border-left:1px solid #e8e8e8;text-align:right}
+.st-table td.ip-col{color:#777;font-weight:500;font-size:13px;border-left:1px solid #f0f0f0;background:#fafafa;text-align:right}
+.st-table tr.row-total td.ip-col{background:#f5f5f5;color:#555;font-weight:600}
+.st-table th.sep{border-left:2px solid #ccc}
+.st-table td.sep{border-left:2px solid #e8e8e8}
 .st-table th.num{text-align:right}
-.st-table td{padding:11px 16px;border-bottom:1px solid #f0f0f0;vertical-align:middle;background:#fff;color:#444;font-size:13px}
+/* 테이블 행 고정 높이 */
+.st-table td{padding:0 8px;border-bottom:1px solid #f0f0f0;vertical-align:middle;background:#fff;color:#444;font-size:13px;height:52px;overflow:hidden}
 .st-table td.num{text-align:right;font-weight:600;color:#333}
-.st-table td.num.highlight{font-size:16px;font-weight:800;color:#111}
-.st-table tbody tr.row-total td.num.highlight{font-size:19px;font-weight:800;color:#111}
-.st-table tbody tr:hover td{background:#f9f9f9}
-.st-table tbody tr.row-total td{background:#f8f8f8;border-top:2px solid #e0e0e0;border-bottom:2px solid #e0e0e0}
-.st-table tbody tr.row-total td.num{font-size:14px;font-weight:700;color:#111}
-.st-type-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;flex-shrink:0}
-.st-type-label{display:flex;align-items:center;font-weight:700}
+.st-table td.num.highlight{font-size:15px;font-weight:800;color:#111}
+.st-table tbody tr.row-total td.num.highlight{font-size:16px;font-weight:800;color:#111}
+.st-table tbody tr:hover td{background:#f9fafb}
+.st-table tbody tr.row-total td{background:#f8f8f8;border-top:2px solid #ddd;border-bottom:2px solid #ddd;height:52px}
+.st-table tbody tr.row-total td.num{font-size:15px;font-weight:700;color:#111}
+.st-type-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;flex-shrink:0}
+.st-type-label{display:inline-flex;align-items:center;font-weight:700;font-size:13px;white-space:nowrap}
 .st-type-label.total{color:#111;font-size:14px}
+
+/* 발주현황 좌우 레이아웃 */
+.st-stats-layout{display:flex;gap:0;align-items:stretch;background:#fff;border-radius:12px;border:1px solid #e8e8e8;box-shadow:0 2px 8px rgba(0,0,0,0.08);overflow:hidden}
+.st-table-side{flex:0 0 200px;width:200px;min-width:200px;max-width:200px;border-right:1px solid #e8e8e8;overflow:hidden}
+.st-chart-side{flex:1;min-width:0;padding:0;display:flex;flex-direction:column}
+/* IP 누적 막대그래프 */
+.ip-chart-header{display:flex;justify-content:space-between;align-items:center;padding:0 18px;height:44px;background:#f5f5f5;border-bottom:2px solid #e0e0e0;box-sizing:border-box}
+.ip-chart-title{font-size:10px;font-weight:600;color:#aaa;letter-spacing:0.8px;text-transform:uppercase}
+.ip-chart-unit{display:none}
+.ip-chart-legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.ip-legend-item{display:flex;align-items:center;gap:4px;font-size:11px;color:#555;font-weight:500}
+.ip-legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.ip-chart-rows{display:flex;flex-direction:column}
+.ip-chart-row{display:flex;align-items:center;gap:10px;padding:0 18px;height:52px;border-bottom:1px solid #f0f0f0;box-sizing:border-box}
+.ip-chart-row:last-child{border-bottom:none}
+.ip-chart-row.row-total{border-top:2px solid #ddd;border-bottom:2px solid #ddd;background:#f8f8f8}
+.ip-chart-row.row-total .ip-chart-bars{opacity:0.7}
+.ip-chart-bars{display:flex;gap:1px;align-items:stretch;height:28px;flex:1;background:#f0f0f0;border-radius:6px;overflow:hidden}
+.ip-chart-row.row-total .ip-chart-bars{height:32px;background:#e8e8e8}
+.ip-chart-seg{display:flex;align-items:center;justify-content:center;height:100%;transition:width 0.5s;position:relative;overflow:hidden;cursor:default;min-width:0}
+.ip-chart-seg:hover{filter:brightness(1.08)}
+.ip-chart-seg-label{font-size:10px;font-weight:700;color:rgba(255,255,255,0.95);white-space:nowrap;padding:0 4px;overflow:hidden;text-overflow:ellipsis}
+.ip-chart-seg:hover .ip-chart-seg-tooltip{display:block}
+.ip-chart-seg-tooltip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#111;color:#fff;font-size:11px;font-weight:500;padding:4px 8px;border-radius:6px;white-space:nowrap;z-index:99;pointer-events:none}
+.ip-chart-seg-tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:#111}
+.ip-chart-total{font-size:12px;font-weight:700;color:#333;white-space:nowrap;min-width:44px;text-align:right}
+.ip-chart-row.row-total .ip-chart-total{font-size:14px;font-weight:800;color:#111}
 .st-type-label.new{color:#3b82f6}
 .st-type-label.reorder{color:#f59e0b}
 .st-type-label.review{color:#f43f5e}
@@ -570,23 +599,99 @@ function updateStats(){
   });
   allIps.sort();
 
-  // 헤더
-  var thead='<tr><th>구분</th><th class="num">건수</th><th class="num">총매출볼륨</th>'+
-    allIps.map(function(ip){return'<th class="num ip-col">'+esc(ip)+'</th>';}).join('')+'</tr>';
+  // div 기반으로 테이블 대체 - width 완전 제어
+  var ROW_H_TOTAL = 52, ROW_H = 52, TH_H = 44;
+  var COL1=110, COL2=144, COL3=200, TW=COL1+COL2+COL3; // 454px
 
-  // 행
-  var tbody=groups.map(function(g){
+  var headerDiv=
+    '<div style="display:flex;height:'+TH_H+'px;background:#f5f5f5;border-bottom:2px solid #e0e0e0;align-items:center;box-sizing:border-box">'+
+      '<div style="width:'+COL1+'px;padding:0 10px;font-size:12px;font-weight:700;color:#666;flex-shrink:0">구분</div>'+
+      '<div style="width:'+COL2+'px;padding:0 10px;font-size:12px;font-weight:700;color:#666;text-align:right;flex-shrink:0">건수</div>'+
+      '<div style="width:'+COL3+'px;padding:0 10px;font-size:12px;font-weight:700;color:#666;text-align:right;flex-shrink:0">볼륨</div>'+
+    '</div>';
+
+  var rowsDiv=groups.map(function(g){
     var grand=g.rows.reduce(function(s,t){return s+parseVol(t.vol);},0);
-    var ipMap=Object.fromEntries(buildIpVolMap(g.rows));
-    var label='<span class="st-type-label '+g.key+'"><span class="st-type-dot st-dot-'+g.key+'"></span>'+g.label+'</span>';
-    var rowCls=g.key==='total'?'row-total':'';
-    var ipCells=allIps.map(function(ip){
-      return'<td class="num ip-col">'+(ipMap[ip]?fmtVolSt(ipMap[ip]):'-')+'</td>';
-    }).join('');
-    return'<tr class="'+rowCls+'"><td>'+label+'</td><td class="num highlight">'+g.rows.length+'</td><td class="num highlight">'+(grand>0?fmtVolSt(grand):'-')+'</td>'+ipCells+'</tr>';
+    var isTotal=g.key==='total';
+    var bg=isTotal?'background:#f8f8f8;border-top:2px solid #ddd;border-bottom:2px solid #ddd;':'border-bottom:1px solid #f0f0f0;';
+    var dot='<span class="st-type-dot st-dot-'+g.key+'" style="margin-right:6px;flex-shrink:0"></span>';
+    var labelColor=g.key==='new'?'#3b82f6':g.key==='reorder'?'#f59e0b':g.key==='review'?'#f43f5e':'#111';
+    var labelStyle='font-size:'+(isTotal?'14':'13')+'px;font-weight:'+(isTotal?'700':'500')+';color:'+labelColor;
+    var numColor=isTotal?'#111':'#aaa';
+    var numWeight=isTotal?'600':'400';
+    var numSize=isTotal?'14':'13';
+    return'<div style="display:flex;height:'+ROW_H+'px;align-items:center;'+bg+'box-sizing:border-box">'+
+      '<div style="width:'+COL1+'px;padding:0 10px;flex-shrink:0;display:flex;align-items:center;'+labelStyle+'">'+dot+g.label+'</div>'+
+      '<div style="width:'+COL2+'px;padding:0 10px;text-align:right;font-weight:'+numWeight+';font-size:'+numSize+'px;color:'+numColor+';flex-shrink:0">'+g.rows.length+'</div>'+
+      '<div style="width:'+COL3+'px;padding:0 10px;text-align:right;font-weight:'+numWeight+';font-size:'+numSize+'px;color:'+numColor+';flex-shrink:0">'+(grand>0?fmtVolSt(grand)+'억':'-')+'</div>'+
+    '</div>';
   }).join('');
 
-  document.getElementById('stats').innerHTML='<div class="st-table-wrap"><span class="st-unit">(단위: 억원)</span><table class="st-table"><thead>'+thead+'</thead><tbody>'+tbody+'</tbody></table></div>';
+  document.getElementById('stats').innerHTML=
+    '<div class="st-stats-layout">'+
+      '<div style="flex:0 0 '+TW+'px;width:'+TW+'px;min-width:'+TW+'px;max-width:'+TW+'px;border-right:1px solid #e8e8e8;overflow:hidden">'+
+        headerDiv+rowsDiv+
+      '</div>'+
+      '<div class="st-chart-side" id="ipChartArea"></div>'+
+    '</div>';
+
+  // IP 누적 막대그래프 렌더
+  renderIpChart(groups, allIps);
+}
+
+function renderIpChart(groups, allIps){
+  var el=document.getElementById('ipChartArea');
+  if(!el)return;
+
+  var ipColors=['#5b8dee','#e07b7b','#9b72cf','#e6956f','#48b0a8','#d4a84b','#c47aac','#6bab7a','#7a9fc4','#a07060'];
+  var ipColorMap={};
+  allIps.forEach(function(ip,i){ipColorMap[ip]=ipColors[i%ipColors.length];});
+
+  // 총합계 포함 전체 그룹
+  var allGroups=groups; // total, new, reorder, review 순
+  // 최대값: 전체 그룹 중 총합이 가장 큰 값 (total행 기준)
+  var maxVal=0;
+  allGroups.forEach(function(g){
+    var s=g.rows.reduce(function(a,t){return a+parseVol(t.vol);},0);
+    if(s>maxVal)maxVal=s;
+  });
+  if(!maxVal){el.innerHTML='';return;}
+
+  var legend=allIps.map(function(ip){
+    return'<div class="ip-legend-item"><div class="ip-legend-dot" style="background:'+ipColorMap[ip]+'"></div>'+esc(ip)+'</div>';
+  }).join('');
+
+  var rows=allGroups.map(function(g){
+    var ipMap=Object.fromEntries(buildIpVolMap(g.rows));
+    var rowTotal=g.rows.reduce(function(s,t){return s+parseVol(t.vol);},0);
+    var isTotal=g.key==='total';
+
+    var segs=allIps.map(function(ip){
+      var v=ipMap[ip]||0;
+      if(!v)return'';
+      var segW=Math.round(v/maxVal*100);
+      var label=fmtVolSt(v)+'억';
+      var showLabel=segW>=5;
+      return'<div class="ip-chart-seg" style="width:'+segW+'%;background:'+ipColorMap[ip]+(!isTotal?';opacity:0.45':'')+'">'+
+        (showLabel?'<span class="ip-chart-seg-label">'+label+'</span>':'')+
+        '<div class="ip-chart-seg-tooltip">'+esc(ip)+' '+label+'</div>'+
+      '</div>';
+    }).join('');
+
+    var dotCls='st-dot-'+g.key;
+    var rowLabel='';// 라벨 제거 - 테이블과 라인 맞춤
+
+    return'<div class="ip-chart-row'+(isTotal?' row-total':'')+'">'+
+      '<div class="ip-chart-bars" style="flex:1">'+segs+'</div>'+
+    '</div>';
+  }).join('');
+
+  el.innerHTML=
+    '<div class="ip-chart-header">'+
+      '<div class="ip-chart-title">IP별 매출볼륨&nbsp;&nbsp;</div>'+
+      '<div class="ip-chart-legend">'+legend+'</div>'+
+    '</div>'+
+    '<div class="ip-chart-rows">'+rows+'</div>';
 }
 
 function render(){
